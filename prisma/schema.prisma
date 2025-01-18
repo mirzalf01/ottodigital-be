@@ -1,0 +1,52 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "go run github.com/steebchen/prisma-client-go"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Brands {
+  id String @id @default(uuid())
+  name String
+  vouchers Vouchers[]
+}
+
+model Vouchers {
+  id String @id @default(uuid())
+  name String?
+  point Int
+  brandId String
+  isValid Boolean @default(true)
+  transactionId String?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  brand Brands @relation(fields: [brandId], references: [id])
+  transaction Transactions? @relation(fields: [transactionId], references: [id])
+}
+
+model Transactions {
+  id String @id @default(uuid())
+  total Int @default(0)
+  customerId String
+  created_at DateTime @default(now())
+
+  customer Customers @relation(fields: [customerId], references: [id])
+  vouchers Vouchers[]
+}
+
+model Customers {
+  id String @id @default(uuid())
+  name String
+  address String?
+
+  Transactions Transactions[]
+}
